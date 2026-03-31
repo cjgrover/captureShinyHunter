@@ -1,9 +1,20 @@
 import cv2
 import numpy as np
 import os
+from locations import Locations
+# mode = 'captures'  # Change to 'captures' to run on captures instead of summary
+# # mode = 'summary'  # Change to 'captures' to run on captures instead of summary
 
-mode = 'captures'  # Change to 'captures' to run on captures instead of summary
-# mode = 'summary'  # Change to 'captures' to run on captures instead of summary
+# locations = Locations.locations
+walkingRoutes = Locations.routesWalking
+
+method = 'walking' # Can be 'walking', 'soft reset summary', 'soft reset encounter'
+
+route = 3
+if method == 'walking' or method == 'soft reset encounter':
+    mode = 'captures'
+elif method == 'soft reset summary':
+    mode = 'summary'
 
 
 def match_template_with_alpha(source_path: str, template_path: str, threshold: float = 0.8, roi: tuple = None):
@@ -151,33 +162,20 @@ if __name__ == "__main__":
                                 print(f'{each.name} has {len(matches)} matches in wrong locations with {grab.name}.')
                     else:
                         print(f'{each.name} has {len(matches)} matches with {grab.name}, but multiple matches found. Skipping drawing.')
+
     elif mode == 'captures':
-
-        # matches = match_template_with_alpha(
-        #     # source_path='wildCaptures/wVoltorb.png',
-        #     # template_path='encounter/original/100.png',
-        #     # source_path='wildCaptures/wEkans.png',
-        #     # template_path='encounter/original/23.png',
-        #     source_path='wildCaptures/wSpearow.png',
-        #     template_path='encounter/original/21.png',
-        #     threshold=0.95,
-        #     # roi=(160+210, 180+24, 440, 440),
-        # )
-        # if len(matches) > 0:
-        #     if len(matches) == 1:
-        #         for x, y, w, h in matches:
-        #             print(f"  → x={x}, y={y}, w={w}, h={h}")
-        #             # if 370 <= x <= 400 and 220 <= y <= 250:
-        #             # print(f'{each.name} has {len(matches)} matches with {grab.name}.')/
-        #             draw_matches('wildCaptures/wSpearow.png', matches, 'matches/21.png')
-        #     #         else:
-        #     #             print(f'{each.name} has {len(matches)} matches in wrong locations with {grab.name}.')
-        #     # else:
-        #     #     print(f'{each.name} has {len(matches)} matches with {grab.name}, but multiple matches found. Skipping drawing.')
-
 
         for grab in os.scandir('wildCaptures'):
             for each in os.scandir('encounter/shiny'):
+                try: num = int(each.name.split('.')[0])
+                except ValueError:
+                    # print(f'Filename {each.name} does not start with a number. Skipping.')
+                    continue
+                if num not in walkingRoutes[route]:
+                    # print(f'Skipping {each.name} because it is not in walking route {route}.')
+                    continue
+                else:
+                    print(f'Processing {each.name} because it is in walking route {route}.')
                 # print(each.path)
                 matches = match_template_with_alpha(
                     source_path=grab.path,
@@ -198,6 +196,15 @@ if __name__ == "__main__":
                         print(f'{each.name} has {len(matches)} matches with {grab.name}, but multiple matches found. Skipping drawing.')
             
             for each in os.scandir('encounter/original'):
+                try: num = int(each.name.split('.')[0])
+                except ValueError:
+                    # print(f'Filename {each.name} does not start with a number. Skipping.')
+                    continue
+                if num not in walkingRoutes[route]:
+                    # print(f'Skipping {each.name} because it is not in walking route {route}.')
+                    continue
+                else:
+                    print(f'Processing {each.name} because it is in walking route {route}.')
                 # print(grab.path)
                 # print(each.path)
                 matches = match_template_with_alpha(
@@ -219,54 +226,4 @@ if __name__ == "__main__":
                     else:
                         print(f'{each.name} has {len(matches)} matches with {grab.name}, but multiple matches found. Skipping drawing.')
 
-    # for each in os.scandir('summary/shiny'):
-    #     # print(each.path)
-    #     matches = match_template_with_alpha(
-    #         source_path="summary.png",
-    #         template_path=each.path,  # PNG with transparency
-    #         threshold=0.9,
-    #         roi=(160, 180, 440, 440)
-    #     )
-    #     # if len(matches) > 0:
-    #     #     for x, y, w, h in matches:
-    #     #         print(f"  → x={x}, y={y}, w={w}, h={h}") 
-    #     #         if 165 <= x <= 185 and 190 <= y <= 220:
-    #     #             print(f'{each.name} has {len(matches)} matches.')
-    #     #             draw_matches("summary.png", matches, 'matches/'+each.name)
-    #     #         else:
-    #     #             print(f'{each.name} has {len(matches)} matches in wrong locations.')
-    #     if len(matches) > 0:
-    #         for x, y, w, h in matches:
-    #             print(f"  → x={x}, y={y}, w={w}, h={h}") 
-    #             print(f'{each.name} has {len(matches)} matches.')
-    #             # draw_matches("summary.png", matches, 'matches/'+each.name)
     
-    # for each in os.scandir('summary/original'):
-    #     # print(each.path)
-    #     matches = match_template_with_alpha(
-    #         source_path="summary.png",
-    #         template_path=each.path,  # PNG with transparency
-    #         threshold=0.9,
-    #         roi=(160, 180, 440, 440)
-    #     )
-    #     # if len(matches) > 0:
-    #     #     for x, y, w, h in matches:
-    #     #         print(f"  → x={x}, y={y}, w={w}, h={h}") 
-    #     #         if 165 <= x <= 185 and 190 <= y <= 220:
-    #     #             print(f'{each.name} has {len(matches)} matches.')
-    #     #             draw_matches("summary.png", matches, 'matches/'+each.name)
-    #     #         else:
-    #     #             print(f'{each.name} has {len(matches)} matches in wrong locations.')
-    #     if len(matches) > 0:
-    #         for x, y, w, h in matches:
-    #             print(f"  → x={x}, y={y}, w={w}, h={h}") 
-    #             print(f'{each.name} has {len(matches)} matches.')
-    #             # draw_matches("summary.png", matches, 'matches/'+each.name)
-    
-            
-
-    # # print(f"Found {len(matches)} match(es):")
-    # # for x, y, w, h in matches:
-    # #     print(f"  → x={x}, y={y}, w={w}, h={h}")
-
-    # # draw_matches("summary.png", matches)
