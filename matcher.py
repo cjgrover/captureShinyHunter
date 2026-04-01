@@ -3,6 +3,7 @@ import numpy as np
 import argparse
 import os
 from locations import Locations
+import can 
 
 parser = argparse.ArgumentParser(description="FRLG Shiny Hunter")
 parser.add_argument('-method', type=str, default='walking', help="Method to use for hunting")   # walking, starter, staticGift, staticEncounter
@@ -144,60 +145,15 @@ def checkMatches(matches, screen, sprite, corner, shinySprite: bool):
 # --- Example usage ---
 if __name__ == "__main__":
 
-    # img = cv2.imread("captures/ivysaur.png")
-    # cv2.rectangle(img, (160+210, 210+24), (160+210+440, 210+24+386), (255, 0, 0), 2)
-    # cv2.imwrite("roi.png", img)
-
-    # if sprite == 'summary':
-
-    #     for grab in os.scandir('captures'):
-    #         for each in os.scandir('summary/shiny'):
-    #             # print(each.path)
-    #             matches = match_template_with_alpha(
-    #                 source_path=grab.path,
-    #                 template_path=each.path,  # PNG with transparency
-    #                 threshold=0.95,
-    #                 # roi=(160+210, 180+24, 440, 440)
-    #             )
-    #             if len(matches) > 0:
-    #                 if len(matches) == 1:
-    #                     for x, y, w, h in matches:
-    #                         # print(f"  → x={x}, y={y}, w={w}, h={h}") 
-    #                         if 370 <= x <= 400 and 220 <= y <= 250:
-    #                             print(f'Shiny {each.name} has {len(matches)} matches with {grab.name}.')
-    #                             draw_matches("summary.png", matches, 'matches/'+each.name)
-    #                         else:
-    #                             print(f'Shiny {each.name} has {len(matches)} matches in wrong locations with {grab.name}.')
-    #                 else:
-    #                     print(f'{each.name} has {len(matches)} matches with {grab.name}, but multiple matches found. Skipping drawing.')
-            
-    #         for each in os.scandir('summary/original'):
-    #             # print(grab.path)
-    #             # print(each.path)
-    #             matches = match_template_with_alpha(
-    #                 source_path=grab.path,
-    #                 template_path=each.path,  # PNG with transparency
-    #                 threshold=0.95,
-    #                 # roi=(160+210, 210+24, 440, 400),
-    #             )
-
-    #             if len(matches) > 0:
-    #                 if len(matches) == 1:
-    #                     for x, y, w, h in matches:
-    #                         print(f"  → x={x}, y={y}, w={w}, h={h}")
-    #                         if 370 <= x <= 400 and 220 <= y <= 250:
-    #                             print(f'{each.name} has {len(matches)} matches with {grab.name}.')
-    #                             draw_matches(grab.path, matches, 'matches/'+each.name)
-    #                         else:
-    #                             print(f'{each.name} has {len(matches)} matches in wrong locations with {grab.name}.')
-    #                 else:
-    #                     print(f'{each.name} has {len(matches)} matches with {grab.name}, but multiple matches found. Skipping drawing.')
-
     # elif sprite == 'capture':
     print('Going through captures')
     for grab in os.scandir('captures'):
-        if grab.name != 'ivysaur.png':
+
+
+        if grab.name != 'geodude.png':
             continue
+
+
         for each in os.scandir(scanDir[0]):
             try: num = int(each.name.split('.')[0])
             except ValueError:
@@ -233,13 +189,25 @@ if __name__ == "__main__":
                 continue
             if num not in routes[route]:
                 continue
-            matches = match_template_with_alpha(
-                source_path=grab.path,
-                template_path=each.path,  # PNG with transparency
-                threshold=0.95,
-                # roi=(160+210, 210+24, 440, 400),
-            )
-
-            if len(matches) > 0:
-                if len(matches) >= 1:
-                    checkMatches(matches,grab,each,cornerRange,False)
+            if target == 0:
+                matches = match_template_with_alpha(
+                    source_path=grab.path,
+                    template_path=each.path,  # PNG with transparency
+                    threshold=0.95,
+                    # roi=(160+210, 180+24, 440, 440)
+                )
+                if len(matches) > 0:
+                    if len(matches) >= 1:
+                        checkMatches(matches,grab,each,cornerRange,False)
+            else:
+                if num == target:
+                    matches = match_template_with_alpha(
+                        source_path=grab.path,
+                        template_path=each.path,  # PNG with transparency
+                        threshold=0.95,
+                        # roi=(160+210, 180+24, 440, 440)
+                    )
+                    if len(matches) > 0:
+                        if len(matches) >= 1:
+                            checkMatches(matches,grab,each,cornerRange,False)
+                else: continue
